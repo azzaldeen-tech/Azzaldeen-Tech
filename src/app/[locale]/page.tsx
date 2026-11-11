@@ -11,6 +11,8 @@ import { SocialLinksSection } from '@/app/components/sections/social-links-secti
 import type { Locale } from '@/app/core/domain/types';
 import { getHomepageData } from '@/app/infrastructure/supabaseClient';
 
+export const dynamic = 'force-dynamic';
+
 interface HomePageProps {
   params: Promise<{ locale: string }>;
 }
