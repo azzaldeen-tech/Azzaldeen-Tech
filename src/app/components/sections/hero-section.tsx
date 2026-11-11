@@ -74,7 +74,7 @@ export function HeroSection({
               {projectsCta}
             </InteractiveCta>
             <InteractiveCta
-              href="/contact"
+              href="https://wa.me/967737389484" 
               className="portfolio-button portfolio-button-secondary"
               direction={direction}
             >

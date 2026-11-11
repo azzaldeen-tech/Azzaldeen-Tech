@@ -71,7 +71,7 @@ export async function Footer() {
               {t('contactDescription')}
             </p>
             <Link
-              href="/contact"
+              href="https://wa.me/967737389484" target="_blank"
               className="mt-5 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-content-on-primary transition-colors hover:bg-primary-hover"
             >
               {t('contactAction')}

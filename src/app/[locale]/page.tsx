@@ -58,9 +58,9 @@ export default async function HomePage({ params }: HomePageProps) {
         portraitLabel={t('hero.portraitLabel')}
       />
       <AboutSection
-        eyebrow={t('about.eyebrow')}
-        title={t('about.title')}
-        description={bio}
+        eyebrow={""}
+        title={""}
+        description={""}
         experienceLabel={t('about.experienceLabel')}
         projectsLabel={t('about.projectsCompletedLabel')}
         yearsExperience={profile?.yearsExperience ?? 0}

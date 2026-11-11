@@ -530,7 +530,7 @@ body {
 .portfolio-section {
   width: min(1200px, calc(100% - 48px));
   margin-inline: auto;
-  padding-block: clamp(72px, 9vw, 116px);
+  padding-block: clamp(50px, 9vw, 70px);
 }
 
 .section-heading-block {
@@ -665,8 +665,8 @@ body {
 
 .stack-panel-heading h3 {
   margin: 0;
-  color: var(--text-muted);
-  font-size: 11px;
+  color: var(--text-subtle);
+  font-size: 18px;
   font-weight: 500;
 }
 

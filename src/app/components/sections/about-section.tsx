@@ -27,7 +27,7 @@ export function AboutSection({
   return (
     <section
       id="about"
-      className="portfolio-section about-section"
+      className="portfolio-sectionportfolio-section about-section"
       aria-labelledby="about-title"
     >
       <Reveal className="section-heading-block">
