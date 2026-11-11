@@ -28,92 +28,69 @@ type ThemeProviderProps = {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-function isTheme(value: string | null): value is Theme {
-  return value === 'light' || value === 'dark' || value === 'system';
-}
-
-function resolveTheme(theme: Theme, enableSystem: boolean): ResolvedTheme {
-  if (theme !== 'system' || !enableSystem || typeof window === 'undefined') {
-    return theme === 'dark' ? 'dark' : 'light';
-  }
-
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light';
-}
-
 export function ThemeProvider({
   children,
   defaultTheme = 'system',
   enableSystem = true,
   storageKey = 'theme',
 }: ThemeProviderProps) {
-  // 1. نبدأ بقيم افتراضية آمنة تماماً للسيرفر لمنع أي خطأ Prerender
   const [theme, setThemeState] = useState<Theme>(defaultTheme);
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>('dark');
   const [mounted, setMounted] = useState(false);
 
-  // 2. قراءة localStorage وتحديث الحالة فور تحميل المتصفح فقط
   useEffect(() => {
     setMounted(true);
     try {
-      const storedTheme = localStorage.getItem(storageKey);
-      if (isTheme(storedTheme)) {
+      const storedTheme = localStorage.getItem(storageKey) as Theme;
+      if (storedTheme === 'light' || storedTheme === 'dark' || storedTheme === 'system') {
         setThemeState(storedTheme);
-        setResolvedTheme(resolveTheme(storedTheme, enableSystem));
+        const resolved =
+          storedTheme === 'system' && enableSystem
+            ? window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+            : (storedTheme as ResolvedTheme);
+        setResolvedTheme(resolved);
+        document.documentElement.classList.toggle('dark', resolved === 'dark');
       } else {
-        setResolvedTheme(resolveTheme(defaultTheme, enableSystem));
-      }
-    } catch (error) {
-      console.error('Unable to read the saved theme preference.', error);
-    }
-  }, [defaultTheme, enableSystem, storageKey]);
-
-  useEffect(() => {
-    if (mounted) {
-      document.documentElement.classList.toggle('dark', resolvedTheme === 'dark');
-    }
-  }, [resolvedTheme, mounted]);
-
-  const applyTheme = useCallback(
-    (selectedTheme: Theme) => {
-      const resolved = resolveTheme(selectedTheme, enableSystem);
-      if (typeof window !== 'undefined') {
+        const resolved =
+          defaultTheme === 'system' && enableSystem
+            ? window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+            : (defaultTheme as ResolvedTheme);
+        setResolvedTheme(resolved);
         document.documentElement.classList.toggle('dark', resolved === 'dark');
       }
-      setResolvedTheme(resolved);
-    },
-    [enableSystem],
-  );
+    } catch (e) {
+      console.error(e);
+    }
+  }, [defaultTheme, enableSystem, storageKey]);
 
   const setTheme = useCallback(
     (nextTheme: Theme) => {
       setThemeState(nextTheme);
       try {
         localStorage.setItem(storageKey, nextTheme);
-      } catch (error) {
-        console.error('Unable to save the theme preference.', error);
+      } catch (e) {
+        console.error(e);
       }
-      applyTheme(nextTheme);
+      const resolved =
+        nextTheme === 'system' && enableSystem
+          ? window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+          : (nextTheme as ResolvedTheme);
+      setResolvedTheme(resolved);
+      document.documentElement.classList.toggle('dark', resolved === 'dark');
     },
-    [applyTheme, storageKey],
+    [enableSystem, storageKey],
   );
-
-  useEffect(() => {
-    if (theme === 'system' && enableSystem) {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      const handleChange = () => applyTheme('system');
-      mediaQuery.addEventListener('change', handleChange);
-      return () => mediaQuery.removeEventListener('change', handleChange);
-    }
-  }, [applyTheme, enableSystem, theme]);
 
   const contextValue = useMemo(
     () => ({ theme, resolvedTheme, setTheme }),
     [resolvedTheme, setTheme, theme],
   );
 
-  // 3. منع عرض محتوى يعتمد على الثيم بصورة خاطئة قبل اكتمال الـ Mounting على العميل
+  // إذا لم يتم التحميل بعد على المتصفح، اعرض الأطفال مباشرة بدون محاولة الوصول لـ localStorage أو window لتجنب الـ Prerender Error
+  if (!mounted) {
+    return <>{children}</>;
+  }
+
   return (
     <ThemeContext.Provider value={contextValue}>
       {children}
